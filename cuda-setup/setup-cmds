@@ -1,0 +1,48 @@
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+
+curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz
+sudo rm -rf /opt/nvim
+sudo tar -C /opt -xzf nvim-linux64.tar.gz
+
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
+
+cp -r .config/nvim
+
+#setup /data
+
+sudo fdisk /dev/nvme1n1
+n, p, 1, w
+
+sudo mkfs.ext4 /dev/nvme1np1
+
+sudo mkdir /data
+
+sudo mount /dev/nvme1n1p1 /data
+
+echo "/dev/nvme1n1p1 /data ext4 defaults 0 0" | sudo tee -a /etc/fstab
+
+sudo chown -R  ubuntu:ubuntu /data
+
+# cuda env
+sudo apt update && sudo apt install -y build-essential gcc g++ gdb cmake
+
+#cuda installation
+https://docs.nvidia.com/cuda/cuda-installation-guide-linux/
+
+#nvidia perstistence daemon
+/etc/systemd/system/nvidia-persisitenced.service
+
+[Unit]
+Description=NVIDIA Persistence Daemon
+After=multi-user.target
+q
+[Service]
+Type=simple
+RemainAfterExit=yes
+ExecStart=/usr/bin/nvidia-persistenced --verbose
+
+[Install]
+WantedBy=multi-user.target
+
+# verify cuda installation  
+https://github.com/nvidia/cuda-samples
